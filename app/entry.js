@@ -1,5 +1,5 @@
 'use strict';
-import $ from 'jquery';
+import $, { data } from 'jquery';
 const block = $('#block');
 const scalingButton = $('#scaling-button');
 
@@ -17,8 +17,14 @@ movingButton.click(() => {
 
 const loadavg = $('#loadavg');
 
-setInterval(() => {
-  $.get('/server-status', {}, (data) => {
-    loadavg.text(data.loadavg.toString());
-  });
-}, 10);
+// WebSocketのオブジェクトをsocket.io-clientモジュールから読み込む
+import io from 'socket.io-client';
+const socket = io('http://localhost:8000'); // ローカルホストに接続することで作成
+
+/**
+ * server-statusという定義されたイベントが発生した時に実行する
+ */
+socket.on('server-status', (data) => {
+  // データを受け取ってjQueryオブジェクトを利用して、段落の中の文字列を受け取ったデータで更新する
+  loadavg.text(data.loadavg.toString());
+});
