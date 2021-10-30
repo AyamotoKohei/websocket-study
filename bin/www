@@ -88,3 +88,27 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+// モジュールの読み込み
+var io = require('socket.io')(server);
+var os = require('os');
+
+/**
+ * server-statusで定義されるイベントをWebSocketの接続に対して発行する関数
+ * @param socket 
+ */
+function emitServerStatus(socket) {
+  // 文字列で定義したイベントをデータ共に発行できる関数
+  socket.emit('server-status', {loadavg: os.loadavg() });
+
+  // 標準出力に文字列を出力
+  console.log('server-status event emitted');
+}
+
+/**
+ * WebSocketの接続が確立した時に実行される関数
+ */
+io.on('connection', function(socket) {
+  // 10m秒ごとにemitServerStatus関数を呼び出す
+  setInterval(emitServerStatus, 10, socket);
+});
